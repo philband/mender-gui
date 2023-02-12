@@ -10,6 +10,7 @@ set -e -x
 # * ANNOUNCEMENT - announcement to display in Hosted Mender UI
 
 HOSTNAME=""
+export HTTP_PORT="${HTTP_PORT:=80}"
 
 if [ -n "$GATEWAY_IP" ]; then
     HOSTNAME=$GATEWAY_IP
@@ -52,6 +53,10 @@ cat >/var/www/mender-gui/dist/env.js <<EOF
     disableOnboarding: "$DISABLE_ONBOARDING"
   }
 EOF
+
+mv /etc/nginx/nginx.conf /etc/nginx/nginx.conf.template && \
+envsubst '$HTTP_PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && \
+rm /etc/nginx/nginx.conf.template
 
 if [ "$1" = 'nginx' ]; then
   exec nginx -g 'daemon off;'
