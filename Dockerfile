@@ -12,14 +12,14 @@ RUN npm run build
 
 FROM nginx:1.23.3-alpine
 EXPOSE 8080
-RUN mkdir -p /var/www/mender-gui/dist
+RUN install -o 65534 -g 65534 -d /var/www/mender-gui/dist
 WORKDIR /var/www/mender-gui/dist
 ARG GIT_COMMIT_TAG
 ENV GIT_COMMIT_TAG="${GIT_COMMIT_TAG:-local_local}"
 
-COPY ./entrypoint.sh /entrypoint.sh
-COPY httpd.conf /etc/nginx/nginx.conf
-COPY --from=build /usr/src/app/dist .
+COPY --chown=65534:65534 ./entrypoint.sh /entrypoint.sh
+COPY --chown=65534:65534 httpd.conf /etc/nginx/nginx.conf
+COPY --chown=65534:65534 --from=build /usr/src/app/dist .
 
 ENTRYPOINT ["/entrypoint.sh"]
 HEALTHCHECK --interval=8s --timeout=15s --start-period=120s --retries=128 CMD wget --quiet --tries=1 --spider --output-document=/dev/null 127.0.0.1
